@@ -1,6 +1,11 @@
 #include <iostream>
 #include <Windows.h>
 #include <chrono>
+#include <vector>
+#include <utility>
+#include <algorithm>
+#include <stdio.h>
+
 using namespace std;
 
 //screen dimensions
@@ -9,10 +14,10 @@ int nScreenHeight = 40;
 
 //player coordinates, view angle, FOV
 //8.0 is midpoint, and therefore player is in the middle of the room
-float fPlayerX = 8.0;
-float fPlayerY = 8.0;
-float fPlayerAngle = 0.0;
-float fPlayerFOV = 3.14159 / 4.0;
+float fPlayerX = 8.0f;
+float fPlayerY = 8.0f;
+float fPlayerAngle = 0.0f;
+float fPlayerFOV = 3.14159f / 4.0f;
 float fDepth = 16.0f; //Map size is 16 so depth shouldn't exeed 16
 
 int nMapWidth = 16;
@@ -30,13 +35,13 @@ int main()
 	map += L"################";
 	map += L"#..............#";
 	map += L"#..............#";
+	map += L"#...........####";
 	map += L"#..............#";
 	map += L"#..............#";
 	map += L"#..............#";
 	map += L"#..............#";
 	map += L"#..............#";
-	map += L"#..............#";
-	map += L"#..............#";
+	map += L"#......#.......#";
 	map += L"#..............#";
 	map += L"#..............#";
 	map += L"#..............#";
@@ -54,25 +59,55 @@ int main()
 		//calculate time elapsed per game loop
 		timePoint2 = chrono::system_clock::now();
 		chrono::duration<float> elapsedTime = timePoint2 - timePoint1;
+		timePoint1 = timePoint2;
 		float fElapsedTime = elapsedTime.count();
 
 		//controls
 		//this handles rotation
 		//multiplying the movement speed of the player angle by a game loop tick gives a smoother movement regardless of what our computer is doing in the background. 
-		if (GetAsyncKeyState((unsigned short) 'A') & 0x8000)
-			fPlayerAngle -= (0.001f) * fElapsedTime;
-		if (GetAsyncKeyState((unsigned short) 'D') & 0x8000)
-			fPlayerAngle += (0.001f) * fElapsedTime;
+		if (GetAsyncKeyState((unsigned short)'A') & 0x8000)
+			fPlayerAngle -= (0.8f) * fElapsedTime;
+		if (GetAsyncKeyState((unsigned short)'D') & 0x8000)
+			fPlayerAngle += (0.8f) * fElapsedTime;
 
-		fElapsedTime = elapsedTime.count();
+		//this handles forward and backward movement
+		// 5.0f just multiplies the unit vector by 5 to give it a magnitude
+		if (GetAsyncKeyState((unsigned short)'W') & 0x8000)
+		{
+			fPlayerX += sinf(fPlayerAngle) * 5.0f * fElapsedTime;
+			fPlayerY += cosf(fPlayerAngle) * 5.0f * fElapsedTime;
+
+			//collision detection
+			//here the player coordinates are converted to integer space and tested on the map. If the cell contains a '#', then we know we've hit a wall.
+			//when we hit a wall, we simply reverse the movement, so the player ends up back in the same place.
+			if (map[(int)fPlayerY * nMapWidth + (int)fPlayerX] == '#')
+			{
+				fPlayerX -= sinf(fPlayerAngle) * 5.0f * fElapsedTime;
+				fPlayerY -= cosf(fPlayerAngle) * 5.0f * fElapsedTime;
+			}
+		}																				
+
+		if (GetAsyncKeyState((unsigned short)'S') & 0x8000)
+		{
+			fPlayerX -= sinf(fPlayerAngle) * 5.0f * fElapsedTime;
+			fPlayerY -= cosf(fPlayerAngle) * 5.0f * fElapsedTime;
+
+			if (map[(int)fPlayerY * nMapWidth + (int)fPlayerX] == '#')
+			{
+				fPlayerX += sinf(fPlayerAngle) * 5.0f * fElapsedTime;
+				fPlayerY += cosf(fPlayerAngle) * 5.0f * fElapsedTime;
+			}
+		}
 
 		for (int x = 0; x < nScreenWidth; x++)
 		{
 			//for each column of screen width, calculate the projected ray angle into the player space: "centre of player view" + "segments of the view"
-			float fRayAngle = (fPlayerAngle - fPlayerFOV / 2.0f) + ((float)x / (float)nScreenWidth) * fPlayerFOV;
+			float fRayAngle = (fPlayerAngle - (fPlayerFOV / 2.0f)) + ((float)x / ((float)nScreenWidth) * fPlayerFOV);
 
-			float fDistanceToWall = 0.0;
-			bool bHitWall = false;
+			float fDistanceToWall = 0.0f;
+			bool bHitWall = false;					//sets when a ray hits a wall block
+			bool bBoundary = false;					//sets when a ray hits a boundary between two wall blocks
+
 			//unit vector for ray in player space
 			float fViewX = sinf(fRayAngle);
 			float fViewY = cosf(fRayAngle);
@@ -93,10 +128,37 @@ int main()
 				}
 				else
 				{
-					//ray is within our boundary so we can now test if the ray cell is a wall block, by mapping the 2D array to	1D to check the cells individually 
+					//ray is within our boundary so we can now test if the ray cell is a wall block, by mapping the 2D space to	1D to check the cells individually 
 					if (map[nTestY * nMapWidth + nTestX] == '#')
 					{
 						bHitWall = true;
+
+						 // distance to the corner of a cell, and the dot product, i.e. the angle between the two vectors
+						vector<pair<float, float>> p;
+
+						//we have four corners to test, so we create two loops to test X coordiinates and Y coordinates
+						for (int tx = 0; tx < 2; tx++)
+							for (int ty = 0; ty < 2; ty++)
+							{
+								//this gives us a vector from each of the exact corners of the cells, to the player
+								float vy = (float)nTestY + ty - fPlayerY;
+								float vx = (float)nTestX + tx - fPlayerX;
+								float distance = sqrt(vx * vx + vy * vy); //magnitude of unit vector i.e. distance
+								float dot = (fViewX * vx / distance) + (fViewY * vy / distance); // dot product, giving the angle between the ray cast from a corner to the player, and the player view
+								p.push_back(make_pair(distance, dot));
+							}
+						//we need to sort our points - lambda function takes two pairs as arguments, does a simple boolean test to see if one pair is smaller than the other based on the first element on the pair, i.e. distance
+						sort(p.begin(), p.end(), [](const pair<float, float> &left, const pair<float, float> &right) {return left.first < right.first; });
+
+						float fBound = 0.01f;
+
+						//inverse cos(dot product) gives the angle between the two rays
+						if (acos(p.at(0).second) < fBound)	bBoundary = true;
+						if (acos(p.at(1).second) < fBound)	bBoundary = true;
+						//if (acos(p.at(3).second) < fBound)	bBoundary = true;
+						//you can add another corner test but it does occasionally draw a corner through a cell...
+
+
 					}
 				}
 			}
@@ -108,14 +170,37 @@ int main()
 			int nCeiling = (float)(nScreenHeight / 2.0) - nScreenHeight / ((float)fDistanceToWall);
 			int nFloor = nScreenHeight - nCeiling;
 
+			//shading in UNICODE that makes the walls appear distant/close depending on fDistanceToWall
+			short nShade = ' ';
+			if (fDistanceToWall <= fDepth / 4.0f)		nShade = 0x2588;   //very close
+			else if (fDistanceToWall < fDepth / 3.0f)	nShade = 0x2593;
+			else if (fDistanceToWall < fDepth / 2.0f)	nShade = 0x2592;
+			else if (fDistanceToWall < fDepth)			nShade = 0x2591;
+			else										nShade = ' ';     //too far away
+
+			if (bBoundary)	nShade = ' '; //black out the boundary
+
 			for (int y = 0; y < nScreenHeight; y++)
-			{
+			{ 
 				if (y < nCeiling)
 					screen[y * nScreenWidth + x] = ' ';
-				else if (y >  nCeiling && y <= nFloor)
-					screen[y * nScreenWidth + x] = '#';
+				else if (y > nCeiling && y <= nFloor)
+					screen[y * nScreenWidth + x] = nShade;
 				else
-					screen[y * nScreenWidth + x] = ' ';
+				{
+					float b = 1.0f - (((float)y - nScreenHeight / 2.0f) / ((float)nScreenHeight / 2.0f));
+					short nShadeFloor = ' ';
+
+					if (b < 0.25)
+						nShadeFloor = '#';
+					else if (b < 0.50)
+						nShadeFloor = 'x';
+					else if (b < 0.75)
+						nShadeFloor = '-';
+					else
+						nShadeFloor = ' ';
+					screen[y * nScreenWidth + x] = nShadeFloor;
+				}
 			}
 		}
 
