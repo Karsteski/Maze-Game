@@ -167,7 +167,7 @@ int main()
 			//For walls further away, there is more ceiling and floor, and vice-versa
 			//Therefore as fDistanceToWall gets bigger, we take the midpoint of the screen height and subtract a portion of it that gets smaller as the distance away gets larger
 			//Floor is just a mirror of the ceiling
-			int nCeiling = (float)(nScreenHeight / 2.0) - nScreenHeight / ((float)fDistanceToWall);
+			int nCeiling = ((float)nScreenHeight / 2.0) - nScreenHeight / ((float)fDistanceToWall);
 			int nFloor = nScreenHeight - nCeiling;
 
 			//shading in UNICODE that makes the walls appear distant/close depending on fDistanceToWall
@@ -203,6 +203,20 @@ int main()
 				}
 			}
 		}
+		//print the player stats - X/Y coordinates, player angle, frame rate = 1/time per frame, synced per game loop
+		swprintf_s(screen, 60, L" X = %3.2f, Y = %3.2f, Angle = %3.2f, FPS = %3.2f ", fPlayerX, fPlayerY, fPlayerAngle, 1.0f / fElapsedTime);
+
+		//draws a map
+		for (int nx = 0; nx < nMapWidth; nx++)
+		{
+			for (int ny = 0; ny < nMapWidth; ny++)
+			{
+				screen[(ny + 1) * nScreenWidth + nx] = map[ny * nMapWidth + nx]; //nMapWidth - nx - 1 mirrors the map so it lines up with the player movement
+			}
+		}
+
+		//draws the player marker on the map
+		screen[((int)fPlayerY + 1) * nScreenWidth + (int)fPlayerX ] = 'P';
 
 		screen[nScreenWidth * nScreenHeight - 1] = '\0'; //sets the last character of the screen array to the esc character, which stops outputting the string
 		WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten); //("HANDLE, which allows access to whatever it references", buffer, # of bytes, coordinates to be written to, "variable that isnt useful")
