@@ -24,7 +24,7 @@ int nMapWidth = 16;
 int nMapHeight = 16;
 
 int selectMap()
-{	
+{
 	int nMapNumber = 0;
 	static int nOldMapNumber = 0;
 	random_device MapNumberGenerator;
@@ -252,7 +252,7 @@ int main()
 				int nRandomNumber = randomDistribution(RNG);
 
 				//trap can't be generated on player position nor player position +/- 1 in either direction
-				if (map[nRandomNumber] == '.' && map[nRandomNumber] != (fPlayerX * fPlayerY || fPlayerX * fPlayerY + 1 || fPlayerX * fPlayerY -1))
+				if (map[nRandomNumber] == '.' && map[nRandomNumber] != (fPlayerX * fPlayerY || fPlayerX * fPlayerY + 1 || fPlayerX * fPlayerY - 1))
 				{
 					if (map[nPreviousRandomNumber] == '#')	map[nPreviousRandomNumber] = '#';
 					else map[nPreviousRandomNumber] = '.';
@@ -268,7 +268,7 @@ int main()
 			{
 				bResetGame = true;
 				nPointTracker = 0;
-				fPlayerX = 15.0f;
+				fPlayerX = 14.0f;
 				fPlayerY = 1.0f;
 			}
 
@@ -330,8 +330,6 @@ int main()
 							if (acos(p.at(1).second) < fBound)	bBoundary = true;
 							//if (acos(p.at(3).second) < fBound)	bBoundary = true;
 							//you can add another corner test but it does occasionally draw a corner through a cell...
-
-
 						}
 					}
 				}
@@ -384,7 +382,7 @@ int main()
 			}
 
 			//print the player stats - X/Y coordinates, frame rate = 1/time per frame, synced per game loop , Point Tracker
-			swprintf_s(screen, 51, L"X = %3.2f, Y = %3.2f, FPS = %3.2f, Points = %4d\n", fPlayerX, fPlayerY, 1.0f / fElapsedTime, nPointTracker);
+			swprintf_s(screen, 50, L"X = %3.2f, Y = %3.2f, FPS = %3.2f, Points = %4d\n", fPlayerX, fPlayerY, 1.0f / fElapsedTime, nPointTracker);
 
 			//draws a map
 			for (int nx = 0; nx < nMapWidth; nx++)
@@ -400,7 +398,7 @@ int main()
 			screen[((int)fPlayerY + 1) * nScreenWidth + nMapWidth - (int)fPlayerX - 1] = 'P';
 
 			//sets the last character of the screen array to the esc character, which stops outputting the string
-			screen[nScreenWidth * nScreenHeight - 1] = '\0'; 
+			screen[nScreenWidth * nScreenHeight - 1] = '\0';
 
 			//("HANDLE, which allows access to whatever it references", buffer, # of bytes, coordinates to be written to, "variable not relevant to this program's uses")
 			WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten);
