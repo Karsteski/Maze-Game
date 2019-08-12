@@ -1,5 +1,5 @@
 # Maze-Game
-My first game!
+Uses the command line as a GUI. Simple maze game focused on coding logic.
 Special thanks to jdavidx9 for his First Person Shooter tutorial to get me started with the physics :)
 
 * Play the game using WASD.
