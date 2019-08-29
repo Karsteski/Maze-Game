@@ -1,3 +1,7 @@
+#include "Graphics.h"
+#include "Logic.h"
+#include "Player.h"
+
 #include <iostream>
 #include <Windows.h>
 #include <chrono>
@@ -382,7 +386,7 @@ int main()
 			}
 
 			//print the player stats - X/Y coordinates, frame rate = 1/time per frame, synced per game loop , Point Tracker
-			swprintf_s(screen, 50, L"X = %3.2f, Y = %3.2f, FPS = %3.2f, Points = %4d\n", fPlayerX, fPlayerY, 1.0f / fElapsedTime, nPointTracker);
+			swprintf_s(screen, 80, L"X = %3.2f, Y = %3.2f, FPS = %3.2f, Points = %4d\n", fPlayerX, fPlayerY, 1.0f / fElapsedTime, nPointTracker);
 
 			//draws a map
 			for (int nx = 0; nx < nMapWidth; nx++)
