@@ -1,7 +1,3 @@
-#include "Graphics.h"
-#include "Logic.h"
-#include "Player.h"
-
 #include <iostream>
 #include <Windows.h>
 #include <chrono>
@@ -9,6 +5,9 @@
 #include <utility>
 #include <algorithm>
 #include <random>
+
+#include "Player.h"
+#include "Map.h"
 
 using namespace std;
 
@@ -27,25 +26,6 @@ float fDepth = 16.0f; //Map size is 16 so depth shouldn't exeed 16
 int nMapWidth = 16;
 int nMapHeight = 16;
 
-int selectMap()
-{
-	int nMapNumber = 0;
-	static int nOldMapNumber = 0;
-	random_device MapNumberGenerator;
-	mt19937 NumberGenerator(MapNumberGenerator());
-	uniform_int_distribution <mt19937::result_type> Distribution(1, 5);
-	nMapNumber = Distribution(NumberGenerator);
-
-	if (nOldMapNumber == nMapNumber)
-	{
-		selectMap();
-	}
-	else
-	{
-		static int nOldMapNumber = nMapNumber;
-		return nMapNumber;
-	}
-}
 
 int main()
 {
@@ -65,135 +45,7 @@ int main()
 	{
 		bool bResetGame = false;
 
-		int nMapSelection = selectMap();
-		wstring map;
-		switch (nMapSelection)
-		{
-		case 1:
-		{
-			map += L"################";
-			map += L"#..............#";
-			map += L"#####.##########";
-			map += L"#####.##.####..G";
-			map += L"#####.##.####..#";
-			map += L"#.....##.......#";
-			map += L"#..#####....#..#";
-			map += L"#..#######..####";
-			map += L"#..###.........#";
-			map += L"#..###..########";
-			map += L"#..###.........#";
-			map += L"#..##########..#";
-			map += L"#......####...##";
-			map += L"#####..##...####";
-			map += L"######....######";
-			map += L"################";
-
-			break;
-		}
-		case 2:
-		{
-			map += L"################";
-			map += L"#............#.#";
-			map += L"G..#######...#.#";
-			map += L"#####..####..#.#";
-			map += L"#####........#.#";
-			map += L"#......#######.#";
-			map += L"#####..#.......#";
-			map += L"####..##.#######";
-			map += L"###..###..######";
-			map += L"###...##.......#";
-			map += L"###.####..######";
-			map += L"##..##.........#";
-			map += L"##..#########..#";
-			map += L"##..##.##..##..#";
-			map += L"#..............#";
-			map += L"################";
-
-			break;
-		}
-		case 3:
-		{
-			map += L"################";
-			map += L"###########....#";
-			map += L"###########.####";
-			map += L"###########.####";
-			map += L"#.....#..#..####";
-			map += L"####..#.#.....##";
-			map += L"#.....G#....####";
-			map += L"####..#.#......#";
-			map += L"#.....#..#..####";
-			map += L"####..#####..###";
-			map += L"####..######.###";
-			map += L"#.......###..###";
-			map += L"######....#..###";
-			map += L"###..##.#......#";
-			map += L"####.##.##.....#";
-			map += L"################";
-
-			break;
-		}
-		case 4:
-		{
-			map += L"################";
-			map += L"#####..........#";
-			map += L"#####..##......#";
-			map += L"#......###.....#";
-			map += L"#.#########....#";
-			map += L"#......###.....#";
-			map += L"#####..##......#";
-			map += L"#........####..#";
-			map += L"#......##......#";
-			map += L"#####..#########";
-			map += L"#####..####....#";
-			map += L"#...#..##.###..#";
-			map += L"#......#..#G...#";
-			map += L"#...####..###..#";
-			map += L"#..............#";
-			map += L"################";
-
-			break;
-		}
-		case 5:
-		{
-			map += L"################";
-			map += L"#G.###########.#";
-			map += L"#...#########..#";
-			map += L"#....#######...#";
-			map += L"#.....#####....#";
-			map += L"#......###.....#";
-			map += L"#.......#......#";
-			map += L"#.......#......#";
-			map += L"######..#..#####";
-			map += L"###.##..#......#";
-			map += L"#...#..###.....#";
-			map += L"#..#..#####....#";
-			map += L"#....#######...#";
-			map += L"###.#.......#..#";
-			map += L"#.....####.....#";
-			map += L"################";
-
-			break;
-		}
-		default:
-		{
-			map += L"################";
-			map += L"#..............#";
-			map += L"#..............#";
-			map += L"#..............#";
-			map += L"#..............#";
-			map += L"#..............#";
-			map += L"#..............#";
-			map += L"#..............#";
-			map += L"#..............#";
-			map += L"#..............#";
-			map += L"#..............#";
-			map += L"#..............#";
-			map += L"#..............#";
-			map += L"#..............#";
-			map += L"#..............#";
-			map += L"#######G########";
-		}
-		}
+		wstring map = Map::selectMap();
 
 		//game loop
 		while (!bResetGame)

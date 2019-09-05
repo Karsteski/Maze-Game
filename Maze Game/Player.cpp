@@ -1,20 +1,17 @@
 #include "Player.h"
 
-Player::Player() {};
+Player::Player() : position(0.0f, 0.0f), angle(0.0f), FOV(0.0f) {}
 
-Player::Player(std::pair <float, float> playerPosition, float playerAngle, float playerFOV)
-{
-	position = playerPosition;
-	angle = playerAngle;
-	FOV = playerFOV;
-}
+Player::Player(std::pair <float, float> playerPosition, float playerAngle, float playerFOV) :
+position(playerPosition), angle(playerAngle), FOV(playerFOV) {}
 
-float Player::Angle()
+
+const float Player::Angle()
 {
 	return angle;
 }
 
-std::pair <float, float> Player::Position()
+const std::pair <float, float> Player::Position()
 {
 	return position;
 }
