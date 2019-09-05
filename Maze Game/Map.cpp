@@ -13,7 +13,7 @@ std::wstring Map::selectMap()
 
 	if (nOldMapNumber == nMapNumber)
 	{
-		Map::selectMap();
+		selectMap();
 	}
 
 	nOldMapNumber = nMapNumber;

@@ -15,8 +15,10 @@ using namespace std;
 int nScreenWidth = 120;
 int nScreenHeight = 40;
 
-//player coordinates, view angle, FOV
-//8.0 is midpoint, and therefore player is in the middle of the room
+auto startPosition = make_pair(14.0f, 1.0f); //x,y
+float startAngle = 0.0f;
+const float playerFOV = 3.14159f / 4.0f;
+
 float fPlayerX = 14.0f;
 float fPlayerY = 1.0f;
 float fPlayerAngle = 0.0f;
@@ -35,37 +37,36 @@ int main()
 	SetConsoleActiveScreenBuffer(hConsole);
 	DWORD dwBytesWritten = 0;
 
-	//we need two time points from the system to create our game ticks, for X and for Y
+	//Time points for game ticks
 	auto timePoint1 = chrono::system_clock::now();
 	auto timePoint2 = chrono::system_clock::now();
 
 	int nPointTracker = 0;
 
+	Player MainPlayer(startPosition, startAngle, playerFOV);
+
 	while (true)
 	{
 		bool bResetGame = false;
-
 		wstring map = Map::selectMap();
 
-		//game loop
 		while (!bResetGame)
 		{
-			//calculate time elapsed per game loop
+			//Time elapsed per game loop
 			timePoint2 = chrono::system_clock::now();
 			chrono::duration<float> elapsedTime = timePoint2 - timePoint1;
 			timePoint1 = timePoint2;
 			float fElapsedTime = elapsedTime.count();
 
-			//controls
-			//this handles rotation
-			//multiplying the movement speed of the player angle by a game loop tick gives a smoother movement regardless of what our computer is doing in the background. 
+			//Rotation
+			//Multiplying the movement speed of the player angle by a game loop tick gives a smoother movement regardless of what computer is doing
 			if (GetAsyncKeyState((unsigned short)'A') & 0x8000)
 				fPlayerAngle -= (0.8f) * fElapsedTime;
 			if (GetAsyncKeyState((unsigned short)'D') & 0x8000)
 				fPlayerAngle += (0.8f) * fElapsedTime;
 
-			//this handles forward and backward movement
-			// 5.0f just multiplies the unit vector by 5 to give it a magnitude
+			//Movement
+			// 5.0f gives the unit vector a magnitude
 			if (GetAsyncKeyState((unsigned short)'W') & 0x8000)
 			{
 				fPlayerX += sinf(fPlayerAngle) * 5.0f * fElapsedTime;

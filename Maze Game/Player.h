@@ -3,19 +3,19 @@
 class Player
 {
 private:
-	std::pair <float, float> position = { 0.0f, 0.0f };
-	float angle = 0.0f;
-	float FOV = 0.0f;
+	std::pair <float, float> position;
+	float angle;
+	const float FOV;
 
 public:
 
 	Player();
-	Player(std::pair <float,float> playerPosition, float playerAngle, float playerFOV);
+	Player(std::pair <float,float> playerPosition, float playerAngle, const float& playerFOV);
 
 	const std::pair <float, float> Position();
 	const float Angle();
 	void Move(std::pair <float, float> playerPosition);
-	void Move(float playerAngle);
+	void Rotate(float playerAngle);
 	void ResetPosition(std::pair <float, float> playerPosition);
 
 };
