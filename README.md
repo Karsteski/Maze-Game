@@ -1,5 +1,5 @@
 # Maze-Game
-Uses the command line as a GUI. Simple maze game focused on coding logic.
+Uses the command line as a GUI.
 
 * Play the game using WASD.
 * Avoid the traps 'x' on the map. Your points will reset!
