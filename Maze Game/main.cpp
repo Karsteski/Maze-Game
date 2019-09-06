@@ -1,3 +1,5 @@
+#define _USE_MATH_DEFINES
+
 #include <iostream>
 #include <Windows.h>
 #include <chrono>
@@ -5,19 +7,19 @@
 #include <utility>
 #include <algorithm>
 #include <random>
+#include <cmath>
 
 #include "Player.h"
 #include "Map.h"
 
 using namespace std;
 
-//screen dimensions
-int nScreenWidth = 120;
-int nScreenHeight = 40;
+const int nScreenWidth = 120;
+const int nScreenHeight = 40;
 
 const auto startPosition = make_pair(14.0f, 1.0f); //x,y
 const float startAngle = 0.0f;
-const float playerFOV = 3.14159f / 4.0f;
+const float playerFOV = static_cast <float> (M_PI_4);
 const float playerRotationSpeed = 0.8f;
 const float playerMovementSpeed = 5.0f;
 const float fDepth = 16.0f; //Map size is 16 so depth shouldn't exeed 16
@@ -54,15 +56,16 @@ int main()
 			float fElapsedTime = elapsedTime.count();
 
 			//Multiplying the movement speed of the player angle by a game loop tick gives a smoother movement regardless of what computer is doing
-			if (GetAsyncKeyState((unsigned short)'A') & 0x8000)
+			if (GetAsyncKeyState(static_cast <unsigned short> ('A')) & 0x8000)
+				
 				MainPlayer.Rotate(MainPlayer.GetAngle() - (playerRotationSpeed * fElapsedTime));
 				
-			if (GetAsyncKeyState((unsigned short)'D') & 0x8000)
+			if (GetAsyncKeyState(static_cast <unsigned short> ('D')) & 0x8000)
 				MainPlayer.Rotate(MainPlayer.GetAngle() + (playerRotationSpeed * fElapsedTime));
 			
 			pair<float, float> changeCoordinates;
 			
-			if (GetAsyncKeyState((unsigned short)'W') & 0x8000)
+			if (GetAsyncKeyState(static_cast <unsigned short> ('W')) & 0x8000)
 			{
 				changeCoordinates.first = sinf(MainPlayer.GetAngle()) * playerMovementSpeed * fElapsedTime;
 				changeCoordinates.second = cosf(MainPlayer.GetAngle()) * playerMovementSpeed * fElapsedTime;
@@ -71,7 +74,7 @@ int main()
 				//Collision detection
 				//Here the player coordinates are converted to integer space and tested on the map. If the cell contains a '#', a wall was hit.
 				//When a wall is hit, simply reverse the movement, so the player ends up back in the same place.
-				if (map[(int)MainPlayer.GetPosition().second * nMapWidth + (int)MainPlayer.GetPosition().first] == '#')
+				if (map[static_cast <int> (MainPlayer.GetPosition().second) * nMapWidth + static_cast <int> (MainPlayer.GetPosition().first)] == '#')
 				{
 					changeCoordinates.first = sinf(MainPlayer.GetAngle()) * playerMovementSpeed * fElapsedTime;
 					changeCoordinates.second = cosf(MainPlayer.GetAngle()) * playerMovementSpeed * fElapsedTime;
@@ -79,13 +82,13 @@ int main()
 				}
 			}
 
-			if (GetAsyncKeyState((unsigned short)'S') & 0x8000)
+			if (GetAsyncKeyState(static_cast <unsigned short> ('S')) & 0x8000)
 			{
 				changeCoordinates.first = sinf(MainPlayer.GetAngle()) * playerMovementSpeed * fElapsedTime;
 				changeCoordinates.second = cosf(MainPlayer.GetAngle()) * playerMovementSpeed * fElapsedTime;
 				MainPlayer.Move((MainPlayer.GetPosition() - changeCoordinates));
 
-				if (map[(int)MainPlayer.GetPosition().second * nMapWidth + (int)MainPlayer.GetPosition().first] == '#')
+				if (map[static_cast <int> (MainPlayer.GetPosition().second) * nMapWidth + static_cast <int> (MainPlayer.GetPosition().first)] == '#')
 				{
 					changeCoordinates.first = sinf(MainPlayer.GetAngle()) * playerMovementSpeed * fElapsedTime;
 					changeCoordinates.second = cosf(MainPlayer.GetAngle()) * playerMovementSpeed * fElapsedTime;
@@ -123,7 +126,8 @@ int main()
 			}
 
 			//kill player and reset game if a trap 'x' is hit
-			if (map[(int)MainPlayer.GetPosition().second * nMapWidth + (int)MainPlayer.GetPosition().first] == 'x')
+			
+			if (map[static_cast <int> (MainPlayer.GetPosition().second) * nMapWidth + static_cast <int> (MainPlayer.GetPosition().first)] == 'x')
 			{
 				bResetGame = true;
 				nPointTracker = 0;
@@ -133,7 +137,7 @@ int main()
 			for (int x = 0; x < nScreenWidth; x++)
 			{
 				//for each column of screen width, calculate the projected ray angle into the player space: "centre of player view" + "segments of the view"
-				float fRayAngle = (MainPlayer.GetAngle() - (MainPlayer.GetFOV() / 2.0f)) + ((float)x / ((float)nScreenWidth) * MainPlayer.GetFOV());
+				float fRayAngle = (MainPlayer.GetAngle() - (MainPlayer.GetFOV() / 2.0f)) + ((static_cast <float> (x) / (static_cast <float> (nScreenWidth)) * MainPlayer.GetFOV()));
 
 				float fDistanceToWall = 0.0f;
 				bool bHitWall = false;					//sets when a ray hits a wall block
@@ -148,8 +152,8 @@ int main()
 					fDistanceToWall += 0.1f;
 
 					//incrementally tests to calculate the approximate distance to a wall. Cast to int because we only care about the int portion of this value.
-					int nTestX = (int)(MainPlayer.GetPosition().first + fViewX * fDistanceToWall);
-					int nTestY = (int)(MainPlayer.GetPosition().second + fViewY * fDistanceToWall);
+					int nTestX = static_cast <int> (MainPlayer.GetPosition().first + fViewX * fDistanceToWall);
+					int nTestY = static_cast <int> (MainPlayer.GetPosition().second + fViewY * fDistanceToWall);
 
 					//test if ray is out of bounds
 					if (nTestX < 0 || nTestX >= nMapWidth || nTestY < 0 || nTestY >= nMapHeight)
@@ -172,8 +176,8 @@ int main()
 								for (int ty = 0; ty < 2; ty++)
 								{
 									//Vector from each of the exact corners of the cells, to the player
-									float vy = (float)nTestY + ty - MainPlayer.GetPosition().second;
-									float vx = (float)nTestX + tx - MainPlayer.GetPosition().first;
+									float vy = static_cast <float> (nTestY) + ty - MainPlayer.GetPosition().second;
+									float vx = static_cast <float> (nTestX) + tx - MainPlayer.GetPosition().first;
 									//magnitude of unit vector i.e. distance
 									float distance = sqrt(vx * vx + vy * vy); 
 									// dot product, giving the angle between the ray cast from a corner to the player, and the player view
@@ -196,7 +200,7 @@ int main()
 				//For walls further away, there is more ceiling and floor, and vice-versa
 				//Therefore as distance to wall increases, take the midpoint of the screen height and subtract a portion of it that gets smaller as the distance away gets larger
 				//Floor is mirror of the ceiling
-				int nCeiling = ((float)nScreenHeight / 2.0f) - ((float)nScreenHeight / (float)fDistanceToWall);
+				int nCeiling = static_cast <int> (static_cast <float> (nScreenHeight) / 2.0f) - (static_cast <float> (nScreenHeight) / fDistanceToWall);
 				int nFloor = nScreenHeight - nCeiling;
 
 				//Shading depending on distance to wall.
@@ -218,7 +222,7 @@ int main()
 						screen[y * nScreenWidth + x] = nShade;
 					else
 					{
-						float b = 1.0f - (((float)y - nScreenHeight / 2.0f) / ((float)nScreenHeight / 2.0f));
+						float b = 1.0f - ((static_cast <float> (y) - nScreenHeight / 2.0f) / (static_cast <float> (nScreenHeight) / 2.0f));
 						short nShadeFloor = ' ';
 
 						if (b < 0.25)		nShadeFloor = '#';
@@ -232,7 +236,7 @@ int main()
 			}
 
 			//if player passes goal, add points and reset game
-			if (map[(int)MainPlayer.GetPosition().second * nMapWidth + (int)MainPlayer.GetPosition().first] == 'G')
+			if (map[static_cast <int> (MainPlayer.GetPosition().second) * nMapWidth + static_cast <int> (MainPlayer.GetPosition().first)] == 'G')
 			{
 				nPointTracker += 100;
 				bResetGame = true;
@@ -253,7 +257,7 @@ int main()
 			}
 
 			//draw player marker
-			screen[((int)MainPlayer.GetPosition().second + 1) * nScreenWidth + nMapWidth - (int)MainPlayer.GetPosition().first - 1] = 'P';
+			screen[(static_cast <int> (MainPlayer.GetPosition().second) + 1) * nScreenWidth + nMapWidth - static_cast <int> (MainPlayer.GetPosition().first) - 1] = 'P';
 
 			//sets the last character of the screen array to the esc character, which stops outputting the string
 			screen[nScreenWidth * nScreenHeight - 1] = '\0';
