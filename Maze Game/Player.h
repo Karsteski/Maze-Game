@@ -21,3 +21,15 @@ public:
 
 };
 
+//Overloads to make std::pair more flexible
+template <typename T, typename U>
+std::pair<T, U> operator+(const std::pair<T, U>& leftValue, const std::pair<T, U>& rightValue)
+{
+	return { leftValue.first + rightValue.first,leftValue.second + rightValue.second };
+}
+
+template <typename T, typename U>
+std::pair<T, U> operator-(const std::pair<T, U>& leftValue, const std::pair<T, U>& rightValue)
+{
+	return { leftValue.first - rightValue.first,leftValue.second - rightValue.second };
+}

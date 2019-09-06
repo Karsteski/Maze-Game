@@ -35,5 +35,3 @@ void Player::ResetPosition(std::pair <float, float> playerPosition)
 {
 	position = playerPosition;
 }
-
-

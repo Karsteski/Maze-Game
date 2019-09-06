@@ -30,17 +30,7 @@ float fDepth = 16.0f; //Map size is 16 so depth shouldn't exeed 16
 int nMapWidth = 16;
 int nMapHeight = 16;
 
-template <typename T, typename U>
-std::pair<T, U> operator+(const std::pair<T, U>& leftValue, const std::pair<T, U>& rightValue) 
-{
-	return { leftValue.first + rightValue.first,leftValue.second + rightValue.second };
-}
 
-template <typename T, typename U>
-std::pair<T, U> operator-(const std::pair<T, U>& leftValue, const std::pair<T, U>& rightValue)
-{
-	return { leftValue.first - rightValue.first,leftValue.second - rightValue.second };
-}
 
 int main()
 {
@@ -276,7 +266,7 @@ int main()
 			//sets the last character of the screen array to the esc character, which stops outputting the string
 			screen[nScreenWidth * nScreenHeight - 1] = '\0';
 
-			//("HANDLE, which allows access to whatever it references", buffer, # of bytes, coordinates to be written to
+			//("HANDLE, which allows access to whatever it references", buffer, # of bytes, coordinates to be written to.
 			WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten);
 		}
 	}
