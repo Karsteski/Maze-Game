@@ -15,22 +15,14 @@ using namespace std;
 int nScreenWidth = 120;
 int nScreenHeight = 40;
 
-auto startPosition = make_pair(14.0f, 1.0f); //x,y
-float startAngle = 0.0f;
+const auto startPosition = make_pair(14.0f, 1.0f); //x,y
+const float startAngle = 0.0f;
 const float playerFOV = 3.14159f / 4.0f;
 const float playerRotationSpeed = 0.8f;
 const float playerMovementSpeed = 5.0f;
-
-float fPlayerX = 14.0f;
-float fPlayerY = 1.0f;
-float fPlayerAngle = 0.0f;
-float fPlayerFOV = 3.14159f / 4.0f;
-float fDepth = 16.0f; //Map size is 16 so depth shouldn't exeed 16
-
-int nMapWidth = 16;
-int nMapHeight = 16;
-
-
+const float fDepth = 16.0f; //Map size is 16 so depth shouldn't exeed 16
+const int nMapWidth = 16;
+const int nMapHeight = 16;
 
 int main()
 {
@@ -180,8 +172,8 @@ int main()
 								for (int ty = 0; ty < 2; ty++)
 								{
 									//Vector from each of the exact corners of the cells, to the player
-									float vy = (float)nTestY + ty - fPlayerY;
-									float vx = (float)nTestX + tx - fPlayerX;
+									float vy = (float)nTestY + ty - MainPlayer.GetPosition().second;
+									float vx = (float)nTestX + tx - MainPlayer.GetPosition().first;
 									//magnitude of unit vector i.e. distance
 									float distance = sqrt(vx * vx + vy * vy); 
 									// dot product, giving the angle between the ray cast from a corner to the player, and the player view
