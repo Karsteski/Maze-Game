@@ -12,8 +12,9 @@ public:
 	Player();
 	Player(std::pair <float,float> playerPosition, float playerAngle, const float& playerFOV);
 
-	const std::pair <float, float> Position();
-	const float Angle();
+	const std::pair <float, float> GetPosition();
+	const float GetAngle();
+	const float GetFOV();
 	void Move(std::pair <float, float> playerPosition);
 	void Rotate(float playerAngle);
 	void ResetPosition(std::pair <float, float> playerPosition);

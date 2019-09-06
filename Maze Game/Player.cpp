@@ -6,14 +6,19 @@ Player::Player(std::pair <float, float> playerPosition, float playerAngle, const
 position(playerPosition), angle(playerAngle), FOV(playerFOV) {}
 
 
-const float Player::Angle()
+const float Player::GetAngle()
 {
 	return angle;
 }
 
-const std::pair <float, float> Player::Position()
+const std::pair <float, float> Player::GetPosition()
 {
 	return position;
+}
+
+const float Player::GetFOV()
+{
+	return FOV;
 }
 
 void Player::Move(std::pair <float, float> playerPosition)
@@ -28,7 +33,7 @@ void Player::Rotate(float playerAngle)
 
 void Player::ResetPosition(std::pair <float, float> playerPosition)
 {
-	position = { 0.0f,0.0f };
+	position = playerPosition;
 }
 
 
